@@ -18,6 +18,14 @@ const router = createRouter({
     {
       path: '/roles',
       component: () => import('../views/RoleListView.vue')
+    },
+    {
+      path: '/audit/logs',
+      component: () => import('../views/AuditLogView.vue')
+    },
+    {
+      path: '/system/configs',
+      component: () => import('../views/SystemConfigView.vue')
     }
   ]
 })

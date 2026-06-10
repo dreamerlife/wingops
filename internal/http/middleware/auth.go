@@ -35,6 +35,9 @@ func Auth(secret string) gin.HandlerFunc {
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			c.Set("permissions", permissionSetFromClaims(claims["permissions"]))
+			if actorID, err := claims.GetSubject(); err == nil {
+				c.Set("actor_id", actorID)
+			}
 		}
 
 		c.Next()

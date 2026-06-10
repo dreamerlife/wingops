@@ -41,6 +41,9 @@ func NewDevelopmentRepository() (*MemoryRepository, error) {
 				{Code: "cmdb.asset.write"},
 				{Code: "auth.user.read"},
 				{Code: "auth.role.read"},
+				{Code: "audit.log.read"},
+				{Code: "system.config.read"},
+				{Code: "system.config.write"},
 			},
 		}},
 	}), nil

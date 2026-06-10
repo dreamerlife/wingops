@@ -6,8 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"wingops/internal/audit"
 	"wingops/internal/auth"
 	"wingops/internal/http/middleware"
+	"wingops/internal/system"
 )
 
 func NewRouter() *gin.Engine {
@@ -24,13 +26,21 @@ func NewRouter() *gin.Engine {
 	}
 	authService := auth.NewService(repo, "dev-secret-change-before-production", time.Hour)
 	authHandler := auth.NewHandler(authService)
+	auditRepo := audit.NewMemoryRepository()
+	auditHandler := audit.NewHandler(auditRepo)
+	systemRepo := system.NewMemoryRepository(system.Config{Key: "platform.name", Value: "WingOps"})
+	systemHandler := system.NewHandler(systemRepo)
 	api := router.Group("/api/v1")
 	authHandler.RegisterRoutes(api)
 
 	protected := api.Group("")
 	protected.Use(middleware.Auth("dev-secret-change-before-production"))
+	protected.Use(middleware.Audit(auditRepo))
 	authHandler.RegisterUserRoutes(protected.Group("", middleware.RequirePermission("auth.user.read")))
 	authHandler.RegisterRoleRoutes(protected.Group("", middleware.RequirePermission("auth.role.read")))
+	auditHandler.RegisterRoutes(protected.Group("", middleware.RequirePermission("audit.log.read")))
+	systemHandler.RegisterReadRoutes(protected.Group("", middleware.RequirePermission("system.config.read")))
+	systemHandler.RegisterWriteRoutes(protected.Group("", middleware.RequirePermission("system.config.write")))
 
 	return router
 }
