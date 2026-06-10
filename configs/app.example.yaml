@@ -1,0 +1,11 @@
+server:
+  addr: ":8080"
+postgres:
+  dsn: "host=localhost user=wingops password=wingops dbname=wingops port=5432 sslmode=disable"
+redis:
+  addr: "localhost:6379"
+nats:
+  url: "nats://localhost:4222"
+jwt:
+  secret: "dev-secret-change-before-production"
+  access_token_ttl_minutes: 60

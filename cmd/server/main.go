@@ -20,8 +20,8 @@ func main() {
 	}()
 
 	router := apphttp.NewRouter()
-	logger.Info("starting wingops server", zap.String("addr", cfg.HTTPAddr))
-	if err := router.Run(cfg.HTTPAddr); err != nil {
+	logger.Info("starting wingops server", zap.String("addr", cfg.Server.Addr))
+	if err := router.Run(cfg.Server.Addr); err != nil {
 		logger.Error("server stopped", zap.Error(err))
 		os.Exit(1)
 	}
