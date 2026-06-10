@@ -6,14 +6,15 @@
         <h1>统一运维管理平台</h1>
       </div>
 
-      <el-form class="login-form" label-position="top">
+      <el-form class="login-form" label-position="top" @submit.prevent="handleLogin">
         <el-form-item label="用户名">
           <el-input v-model="username" autocomplete="username" />
         </el-form-item>
         <el-form-item label="密码">
           <el-input v-model="password" type="password" autocomplete="current-password" show-password />
         </el-form-item>
-        <el-button class="login-button" type="primary">登录</el-button>
+        <p v-if="errorMessage" class="error-message">{{ errorMessage }}</p>
+        <el-button class="login-button" type="primary" native-type="submit" :loading="submitting">登录</el-button>
       </el-form>
     </section>
   </main>
@@ -22,8 +23,25 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+import { useAuthStore } from '../stores/auth'
+
+const authStore = useAuthStore()
 const username = ref('')
 const password = ref('')
+const submitting = ref(false)
+const errorMessage = ref('')
+
+async function handleLogin() {
+  errorMessage.value = ''
+  submitting.value = true
+  try {
+    await authStore.login(username.value, password.value)
+  } catch {
+    errorMessage.value = '用户名或密码错误'
+  } finally {
+    submitting.value = false
+  }
+}
 </script>
 
 <style scoped>
@@ -74,5 +92,11 @@ h1 {
 .login-button {
   width: 100%;
   margin-top: 8px;
+}
+
+.error-message {
+  margin: 0;
+  color: #b42318;
+  font-size: 13px;
 }
 </style>
