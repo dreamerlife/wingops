@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"wingops/internal/auth"
+	"wingops/internal/http/middleware"
 )
 
 func NewRouter() *gin.Engine {
@@ -23,7 +24,13 @@ func NewRouter() *gin.Engine {
 	}
 	authService := auth.NewService(repo, "dev-secret-change-before-production", time.Hour)
 	authHandler := auth.NewHandler(authService)
-	authHandler.RegisterRoutes(router.Group("/api/v1"))
+	api := router.Group("/api/v1")
+	authHandler.RegisterRoutes(api)
+
+	protected := api.Group("")
+	protected.Use(middleware.Auth("dev-secret-change-before-production"))
+	authHandler.RegisterUserRoutes(protected.Group("", middleware.RequirePermission("auth.user.read")))
+	authHandler.RegisterRoleRoutes(protected.Group("", middleware.RequirePermission("auth.role.read")))
 
 	return router
 }

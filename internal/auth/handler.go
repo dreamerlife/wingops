@@ -24,6 +24,14 @@ func (h *Handler) RegisterRoutes(router gin.IRouter) {
 	router.POST("/auth/login", h.Login)
 }
 
+func (h *Handler) RegisterUserRoutes(router gin.IRouter) {
+	router.GET("/auth/users", h.ListUsers)
+}
+
+func (h *Handler) RegisterRoleRoutes(router gin.IRouter) {
+	router.GET("/auth/roles", h.ListRoles)
+}
+
 func (h *Handler) Login(c *gin.Context) {
 	var req loginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -42,4 +50,23 @@ func (h *Handler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"code": 0, "data": token})
+}
+
+func (h *Handler) ListUsers(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"code": 0, "data": []gin.H{
+		{
+			"username":     "admin",
+			"display_name": "管理员",
+			"status":       "active",
+		},
+	}})
+}
+
+func (h *Handler) ListRoles(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"code": 0, "data": []gin.H{
+		{"name": "system_admin", "display_name": "系统管理员"},
+		{"name": "ops_admin", "display_name": "运维管理员"},
+		{"name": "ops_operator", "display_name": "运维操作员"},
+		{"name": "readonly", "display_name": "只读用户"},
+	}})
 }

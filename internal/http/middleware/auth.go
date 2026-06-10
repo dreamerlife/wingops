@@ -23,6 +23,9 @@ func Auth(secret string) gin.HandlerFunc {
 		}
 
 		token, err := jwt.Parse(tokenValue, func(token *jwt.Token) (any, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, jwt.ErrTokenUnverifiable
+			}
 			return []byte(secret), nil
 		})
 		if err != nil || !token.Valid {
@@ -30,6 +33,46 @@ func Auth(secret string) gin.HandlerFunc {
 			return
 		}
 
+		if claims, ok := token.Claims.(jwt.MapClaims); ok {
+			c.Set("permissions", permissionSetFromClaims(claims["permissions"]))
+		}
+
 		c.Next()
 	}
+}
+
+func RequirePermission(code string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		value, ok := c.Get("permissions")
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"code": 403, "message": "permission denied"})
+			return
+		}
+		permissions, ok := value.(map[string]struct{})
+		if !ok {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"code": 403, "message": "permission denied"})
+			return
+		}
+		if _, allowed := permissions[code]; !allowed {
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"code": 403, "message": "permission denied"})
+			return
+		}
+
+		c.Next()
+	}
+}
+
+func permissionSetFromClaims(value any) map[string]struct{} {
+	permissions := make(map[string]struct{})
+	items, ok := value.([]any)
+	if !ok {
+		return permissions
+	}
+	for _, item := range items {
+		code, ok := item.(string)
+		if ok && code != "" {
+			permissions[code] = struct{}{}
+		}
+	}
+	return permissions
 }

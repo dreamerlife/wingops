@@ -52,6 +52,7 @@ func (s *Service) Login(ctx context.Context, username string, password string) (
 		"sub":          user.ID,
 		"username":     user.Username,
 		"display_name": user.DisplayName,
+		"permissions":  collectPermissionCodes(user.Roles),
 		"exp":          expiresAt.Unix(),
 	})
 	signed, err := token.SignedString(s.jwtSecret)
@@ -63,4 +64,19 @@ func (s *Service) Login(ctx context.Context, username string, password string) (
 		AccessToken: signed,
 		TokenType:   "Bearer",
 	}, nil
+}
+
+func collectPermissionCodes(roles []Role) []string {
+	seen := make(map[string]struct{})
+	codes := make([]string, 0)
+	for _, role := range roles {
+		for _, code := range role.PermissionCodes() {
+			if _, ok := seen[code]; ok {
+				continue
+			}
+			seen[code] = struct{}{}
+			codes = append(codes, code)
+		}
+	}
+	return codes
 }

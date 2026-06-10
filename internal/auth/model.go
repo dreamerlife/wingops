@@ -8,6 +8,7 @@ type User struct {
 	PasswordHash string
 	DisplayName  string
 	Status       string
+	Roles        []Role
 }
 
 func (u User) Active() bool {
@@ -20,8 +21,9 @@ type TokenPair struct {
 }
 
 type Claims struct {
-	UserID      string `json:"user_id"`
-	Username    string `json:"username"`
-	DisplayName string `json:"display_name"`
+	UserID      string   `json:"user_id"`
+	Username    string   `json:"username"`
+	DisplayName string   `json:"display_name"`
+	Permissions []string `json:"permissions"`
 	ExpiresAt   time.Time
 }

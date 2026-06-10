@@ -34,6 +34,15 @@ func NewDevelopmentRepository() (*MemoryRepository, error) {
 		PasswordHash: hash,
 		DisplayName:  "管理员",
 		Status:       "active",
+		Roles: []Role{{
+			Name: "system_admin",
+			Permissions: []Permission{
+				{Code: "cmdb.asset.read"},
+				{Code: "cmdb.asset.write"},
+				{Code: "auth.user.read"},
+				{Code: "auth.role.read"},
+			},
+		}},
 	}), nil
 }
 
