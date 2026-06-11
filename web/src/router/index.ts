@@ -40,8 +40,16 @@ const router = createRouter({
       component: () => import('../views/cmdb/AssetListView.vue')
     },
     {
+      path: '/cmdb/assets/import',
+      component: () => import('../views/cmdb/AssetImportView.vue')
+    },
+    {
       path: '/cmdb/assets/:id',
       component: () => import('../views/cmdb/AssetDetailView.vue')
+    },
+    {
+      path: '/cmdb/api-keys',
+      component: () => import('../views/cmdb/ApiKeyListView.vue')
     }
   ]
 })

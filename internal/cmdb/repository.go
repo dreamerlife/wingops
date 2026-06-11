@@ -29,6 +29,7 @@ type Repository interface {
 	UpdateAsset(ctx context.Context, asset Asset, actorID string) (Asset, error)
 	DeleteAsset(ctx context.Context, id string) error
 	ListAssetChangeLogs(ctx context.Context, assetID string) ([]AssetChangeLog, error)
+	UpsertAsset(ctx context.Context, asset Asset, actorID string) (Asset, error)
 }
 
 type MemoryRepository struct {
@@ -243,6 +244,23 @@ func (r *MemoryRepository) ListAssetChangeLogs(_ context.Context, assetID string
 	logs := make([]AssetChangeLog, len(r.changeLogs[assetID]))
 	copy(logs, r.changeLogs[assetID])
 	return logs, nil
+}
+
+func (r *MemoryRepository) UpsertAsset(ctx context.Context, asset Asset, actorID string) (Asset, error) {
+	r.mu.RLock()
+	for _, existing := range r.assets {
+		if existing.ModelID == asset.ModelID && existing.UniqueKey == asset.UniqueKey {
+			asset.ID = existing.ID
+			if asset.Status == "" {
+				asset.Status = existing.Status
+			}
+			r.mu.RUnlock()
+			return r.UpdateAsset(ctx, asset, actorID)
+		}
+	}
+	r.mu.RUnlock()
+
+	return r.CreateAsset(ctx, asset, actorID)
 }
 
 func (r *MemoryRepository) appendChangeLog(assetID string, actorID string, before map[string]any, after map[string]any) {
