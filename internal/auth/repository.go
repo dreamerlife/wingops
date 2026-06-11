@@ -39,6 +39,8 @@ func NewDevelopmentRepository() (*MemoryRepository, error) {
 			Permissions: []Permission{
 				{Code: "cmdb.asset.read"},
 				{Code: "cmdb.asset.write"},
+				{Code: "cmdb.model.read"},
+				{Code: "cmdb.model.write"},
 				{Code: "auth.user.read"},
 				{Code: "auth.role.read"},
 				{Code: "audit.log.read"},

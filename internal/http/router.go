@@ -8,6 +8,7 @@ import (
 
 	"wingops/internal/audit"
 	"wingops/internal/auth"
+	"wingops/internal/cmdb"
 	"wingops/internal/http/middleware"
 	"wingops/internal/system"
 )
@@ -30,6 +31,8 @@ func NewRouter() *gin.Engine {
 	auditHandler := audit.NewHandler(auditRepo)
 	systemRepo := system.NewMemoryRepository(system.Config{Key: "platform.name", Value: "WingOps"})
 	systemHandler := system.NewHandler(systemRepo)
+	cmdbRepo := cmdb.NewMemoryRepository()
+	cmdbModelHandler := cmdb.NewModelHandler(cmdbRepo)
 	api := router.Group("/api/v1")
 	authHandler.RegisterRoutes(api)
 
@@ -41,6 +44,8 @@ func NewRouter() *gin.Engine {
 	auditHandler.RegisterRoutes(protected.Group("", middleware.RequirePermission("audit.log.read")))
 	systemHandler.RegisterReadRoutes(protected.Group("", middleware.RequirePermission("system.config.read")))
 	systemHandler.RegisterWriteRoutes(protected.Group("", middleware.RequirePermission("system.config.write")))
+	cmdbModelHandler.RegisterReadRoutes(protected.Group("", middleware.RequirePermission("cmdb.model.read")))
+	cmdbModelHandler.RegisterWriteRoutes(protected.Group("", middleware.RequirePermission("cmdb.model.write")))
 
 	return router
 }

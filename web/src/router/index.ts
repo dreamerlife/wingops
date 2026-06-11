@@ -26,6 +26,14 @@ const router = createRouter({
     {
       path: '/system/configs',
       component: () => import('../views/SystemConfigView.vue')
+    },
+    {
+      path: '/cmdb/model-groups',
+      component: () => import('../views/cmdb/ModelGroupListView.vue')
+    },
+    {
+      path: '/cmdb/models/:id',
+      component: () => import('../views/cmdb/ModelEditorView.vue')
     }
   ]
 })
