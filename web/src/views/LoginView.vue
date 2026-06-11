@@ -22,10 +22,12 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { useAuthStore } from '../stores/auth'
 
 const authStore = useAuthStore()
+const router = useRouter()
 const username = ref('')
 const password = ref('')
 const submitting = ref(false)
@@ -36,6 +38,7 @@ async function handleLogin() {
   submitting.value = true
   try {
     await authStore.login(username.value, password.value)
+    await router.push('/dashboard')
   } catch {
     errorMessage.value = '用户名或密码错误'
   } finally {
