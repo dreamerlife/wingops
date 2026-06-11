@@ -34,6 +34,14 @@ const router = createRouter({
     {
       path: '/cmdb/models/:id',
       component: () => import('../views/cmdb/ModelEditorView.vue')
+    },
+    {
+      path: '/cmdb/assets',
+      component: () => import('../views/cmdb/AssetListView.vue')
+    },
+    {
+      path: '/cmdb/assets/:id',
+      component: () => import('../views/cmdb/AssetDetailView.vue')
     }
   ]
 })

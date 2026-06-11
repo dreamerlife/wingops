@@ -33,6 +33,7 @@ func NewRouter() *gin.Engine {
 	systemHandler := system.NewHandler(systemRepo)
 	cmdbRepo := cmdb.NewMemoryRepository()
 	cmdbModelHandler := cmdb.NewModelHandler(cmdbRepo)
+	cmdbAssetHandler := cmdb.NewAssetHandler(cmdbRepo)
 	api := router.Group("/api/v1")
 	authHandler.RegisterRoutes(api)
 
@@ -46,6 +47,8 @@ func NewRouter() *gin.Engine {
 	systemHandler.RegisterWriteRoutes(protected.Group("", middleware.RequirePermission("system.config.write")))
 	cmdbModelHandler.RegisterReadRoutes(protected.Group("", middleware.RequirePermission("cmdb.model.read")))
 	cmdbModelHandler.RegisterWriteRoutes(protected.Group("", middleware.RequirePermission("cmdb.model.write")))
+	cmdbAssetHandler.RegisterReadRoutes(protected.Group("", middleware.RequirePermission("cmdb.asset.read")))
+	cmdbAssetHandler.RegisterWriteRoutes(protected.Group("", middleware.RequirePermission("cmdb.asset.write")))
 
 	return router
 }
