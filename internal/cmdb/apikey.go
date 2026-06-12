@@ -7,9 +7,11 @@ import (
 )
 
 type APIKey struct {
-	KeyID  string
-	Secret string
-	Status string
+	ID     string `json:"id"`
+	Name   string `json:"name"`
+	KeyID  string `json:"key_id"`
+	Secret string `json:"secret,omitempty"`
+	Status string `json:"status"`
 }
 
 func NewDevelopmentAPIKey() APIKey {

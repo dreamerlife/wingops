@@ -18,7 +18,31 @@ type Asset struct {
 	ModelID    string         `json:"model_id"`
 	UniqueKey  string         `json:"unique_key"`
 	Status     string         `json:"status"`
+	GroupIDs   []string       `json:"group_ids,omitempty"`
 	Attributes map[string]any `json:"attributes"`
+}
+
+type AssetGroup struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
+	Dimension   string `json:"dimension"`
+}
+
+type AssetListFilter struct {
+	ModelID  string
+	GroupID  string
+	Status   string
+	Keyword  string
+	Page     int
+	PageSize int
+}
+
+type AssetListResult struct {
+	Items    []Asset `json:"items"`
+	Total    int     `json:"total"`
+	Page     int     `json:"page"`
+	PageSize int     `json:"page_size"`
 }
 
 type AssetChangeLog struct {

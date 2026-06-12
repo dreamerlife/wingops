@@ -58,4 +58,15 @@ const router = createRouter({
   ]
 })
 
+router.beforeEach((to) => {
+  const token = localStorage.getItem('wingops.access_token')
+  if (to.path !== '/login' && !token) {
+    return '/login'
+  }
+  if (to.path === '/login' && token) {
+    return '/dashboard'
+  }
+  return true
+})
+
 export default router

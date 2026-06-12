@@ -112,5 +112,9 @@ func writeModelError(c *gin.Context, err error) {
 		c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": err.Error()})
 		return
 	}
+	if errors.Is(err, ErrModelHasAssets) {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "模型已被资产引用，无法删除"})
+		return
+	}
 	c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": err.Error()})
 }

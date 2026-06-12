@@ -9,8 +9,7 @@ import (
 )
 
 type SyncHandler struct {
-	repo   Repository
-	apiKey APIKey
+	repo Repository
 }
 
 type syncRequest struct {
@@ -20,12 +19,21 @@ type syncRequest struct {
 }
 
 func NewSyncHandler(repo Repository, apiKey APIKey) *SyncHandler {
-	return &SyncHandler{repo: repo, apiKey: apiKey}
+	return &SyncHandler{repo: repo}
 }
 
 func (h *SyncHandler) RegisterRoutes(router gin.IRouter) {
 	router.POST("/cmdb/assets/sync", h.SyncAssets)
 	router.POST("/cmdb/assets/import/preview", h.PreviewCSVImport)
+}
+
+func (h *SyncHandler) RegisterAPIKeyReadRoutes(router gin.IRouter) {
+	router.GET("/cmdb/api-keys", h.ListAPIKeys)
+}
+
+func (h *SyncHandler) RegisterAPIKeyWriteRoutes(router gin.IRouter) {
+	router.POST("/cmdb/api-keys", h.CreateAPIKey)
+	router.DELETE("/cmdb/api-keys/:id", h.RevokeAPIKey)
 }
 
 func (h *SyncHandler) SyncAssets(c *gin.Context) {
@@ -40,6 +48,7 @@ func (h *SyncHandler) SyncAssets(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"code": 401, "message": "invalid api signature"})
 		return
 	}
+	apiKeyID, _ := c.Get("api_key_id")
 
 	var req syncRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -61,7 +70,7 @@ func (h *SyncHandler) SyncAssets(c *gin.Context) {
 			UniqueKey:  imported.UniqueKey,
 			Attributes: imported.Attributes,
 		}
-		saved, err := h.repo.UpsertAsset(c.Request.Context(), asset, "api:"+h.apiKey.KeyID)
+		saved, err := h.repo.UpsertAsset(c.Request.Context(), asset, "api:"+stringValue(apiKeyID))
 		if err != nil {
 			writeAssetError(c, err)
 			return
@@ -70,6 +79,41 @@ func (h *SyncHandler) SyncAssets(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{"synced": len(synced), "assets": synced}})
+}
+
+func (h *SyncHandler) ListAPIKeys(c *gin.Context) {
+	keys, err := h.repo.ListAPIKeys(c.Request.Context())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "list api keys failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "data": keys})
+}
+
+func (h *SyncHandler) CreateAPIKey(c *gin.Context) {
+	var key APIKey
+	if err := c.ShouldBindJSON(&key); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"code": 400, "message": "invalid request"})
+		return
+	}
+	created, err := h.repo.CreateAPIKey(c.Request.Context(), key)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "create api key failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "data": created})
+}
+
+func (h *SyncHandler) RevokeAPIKey(c *gin.Context) {
+	if err := h.repo.RevokeAPIKey(c.Request.Context(), c.Param("id")); err != nil {
+		if err == ErrAPIKeyNotFound {
+			c.JSON(http.StatusNotFound, gin.H{"code": 404, "message": err.Error()})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "message": "revoke api key failed"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"code": 0, "data": gin.H{"revoked": true}})
 }
 
 func (h *SyncHandler) PreviewCSVImport(c *gin.Context) {
@@ -82,11 +126,18 @@ func (h *SyncHandler) PreviewCSVImport(c *gin.Context) {
 }
 
 func (h *SyncHandler) authorized(c *gin.Context, body []byte) bool {
-	if !h.apiKey.Active() {
+	key, err := h.repo.GetAPIKeyByKeyID(c.Request.Context(), c.GetHeader("X-Api-Key"))
+	if err != nil || !key.Active() {
 		return false
 	}
-	if c.GetHeader("X-Api-Key") != h.apiKey.KeyID {
-		return false
+	c.Set("api_key_id", key.KeyID)
+	return key.VerifySignature(body, c.GetHeader("X-Signature"))
+}
+
+func stringValue(value any) string {
+	text, ok := value.(string)
+	if !ok {
+		return ""
 	}
-	return h.apiKey.VerifySignature(body, c.GetHeader("X-Signature"))
+	return text
 }

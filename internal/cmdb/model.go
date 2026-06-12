@@ -32,6 +32,7 @@ type Model struct {
 	DisplayName string            `json:"display_name"`
 	Description string            `json:"description"`
 	Fields      []FieldDefinition `json:"fields"`
+	Relations   []ModelRelation   `json:"relations"`
 }
 
 type FieldDefinition struct {
@@ -42,6 +43,14 @@ type FieldDefinition struct {
 	UniqueValue bool      `json:"unique_value"`
 	Options     []string  `json:"options,omitempty"`
 	SortOrder   int       `json:"sort_order"`
+}
+
+type ModelRelation struct {
+	ID            string `json:"id"`
+	SourceModelID string `json:"source_model_id"`
+	TargetModelID string `json:"target_model_id"`
+	RelationType  string `json:"relation_type"`
+	DisplayName   string `json:"display_name"`
 }
 
 func (f FieldDefinition) Validate(value any) error {

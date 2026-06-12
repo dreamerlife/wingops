@@ -1,12 +1,14 @@
 package auth
 
 type Permission struct {
-	Code string
+	Code        string `json:"code"`
+	Description string `json:"description"`
 }
 
 type Role struct {
-	Name        string
-	Permissions []Permission
+	Name        string       `json:"name"`
+	DisplayName string       `json:"display_name"`
+	Permissions []Permission `json:"permissions"`
 }
 
 func (r Role) Allows(code string) bool {

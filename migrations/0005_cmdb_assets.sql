@@ -1,4 +1,4 @@
-CREATE TABLE asset_groups (
+CREATE TABLE IF NOT EXISTS asset_groups (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name TEXT NOT NULL UNIQUE,
   display_name TEXT NOT NULL,
@@ -6,7 +6,7 @@ CREATE TABLE asset_groups (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE assets (
+CREATE TABLE IF NOT EXISTS assets (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   model_id UUID NOT NULL REFERENCES models(id),
   unique_key TEXT NOT NULL,
@@ -17,13 +17,13 @@ CREATE TABLE assets (
   UNIQUE(model_id, unique_key)
 );
 
-CREATE TABLE asset_group_members (
+CREATE TABLE IF NOT EXISTS asset_group_members (
   asset_id UUID NOT NULL REFERENCES assets(id),
   group_id UUID NOT NULL REFERENCES asset_groups(id),
   PRIMARY KEY(asset_id, group_id)
 );
 
-CREATE TABLE asset_change_logs (
+CREATE TABLE IF NOT EXISTS asset_change_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   asset_id UUID NOT NULL REFERENCES assets(id),
   actor_id UUID,

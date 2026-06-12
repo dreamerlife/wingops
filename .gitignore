@@ -1,0 +1,4 @@
+.DS_Store
+.gocache/
+.idea/
+configs/app.yaml

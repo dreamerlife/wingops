@@ -3,12 +3,12 @@ package auth
 import "time"
 
 type User struct {
-	ID           string
-	Username     string
-	PasswordHash string
-	DisplayName  string
-	Status       string
-	Roles        []Role
+	ID           string `json:"id"`
+	Username     string `json:"username"`
+	PasswordHash string `json:"-"`
+	DisplayName  string `json:"display_name"`
+	Status       string `json:"status"`
+	Roles        []Role `json:"roles"`
 }
 
 func (u User) Active() bool {

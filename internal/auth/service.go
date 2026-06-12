@@ -66,6 +66,42 @@ func (s *Service) Login(ctx context.Context, username string, password string) (
 	}, nil
 }
 
+func (s *Service) ListUsers(ctx context.Context) ([]User, error) {
+	return s.repo.ListUsers(ctx)
+}
+
+func (s *Service) CreateUser(ctx context.Context, user User, password string, roleNames []string) (User, error) {
+	return s.repo.CreateUser(ctx, user, password, roleNames)
+}
+
+func (s *Service) UpdateUser(ctx context.Context, user User, password string) (User, error) {
+	return s.repo.UpdateUser(ctx, user, password)
+}
+
+func (s *Service) DeleteUser(ctx context.Context, id string) error {
+	return s.repo.DeleteUser(ctx, id)
+}
+
+func (s *Service) ListRoles(ctx context.Context) ([]Role, error) {
+	return s.repo.ListRoles(ctx)
+}
+
+func (s *Service) CreateRole(ctx context.Context, role Role) (Role, error) {
+	return s.repo.CreateRole(ctx, role)
+}
+
+func (s *Service) UpdateRole(ctx context.Context, role Role) (Role, error) {
+	return s.repo.UpdateRole(ctx, role)
+}
+
+func (s *Service) DeleteRole(ctx context.Context, name string) error {
+	return s.repo.DeleteRole(ctx, name)
+}
+
+func (s *Service) ListPermissions(ctx context.Context) ([]Permission, error) {
+	return s.repo.ListPermissions(ctx)
+}
+
 func collectPermissionCodes(roles []Role) []string {
 	seen := make(map[string]struct{})
 	codes := make([]string, 0)
