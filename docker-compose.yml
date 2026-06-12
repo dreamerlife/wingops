@@ -1,0 +1,29 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: wingops
+      POSTGRES_USER: wingops
+      POSTGRES_PASSWORD: wingops
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  nats:
+    image: nats:2-alpine
+    ports:
+      - "4222:4222"
+
+  victoriametrics:
+    image: victoriametrics/victoria-metrics:v1.101.0
+    ports:
+      - "8428:8428"
+
+volumes:
+  postgres_data:
